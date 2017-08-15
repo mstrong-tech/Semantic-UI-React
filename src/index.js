@@ -5,6 +5,9 @@ export { default as Radio } from './addons/Radio'
 export { default as Select } from './addons/Select'
 export { default as TextArea } from './addons/TextArea'
 
+export { default as Toast } from './addons/Toast'
+export { default as ToastGroup } from './addons/Toast/ToastGroup'
+
 // Behaviors
 export { default as Visibility } from './behaviors/Visibility'
 
