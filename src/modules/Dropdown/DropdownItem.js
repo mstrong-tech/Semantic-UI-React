@@ -126,7 +126,7 @@ class DropdownItem extends Component {
       'aria-selected': selected,
     }
 
-    if (!_.isNil(children)) {
+    if (!childrenUtils.isNil(children)) {
       return (
         <ElementType {...rest} {...ariaOptions} className={classes} onClick={this.handleClick}>
           {children}
@@ -142,13 +142,13 @@ class DropdownItem extends Component {
       'span',
       val => ({ children: val }),
       description,
-      { defaultProps: { className: 'description' } }
+      { defaultProps: { className: 'description' } },
     )
     const textElement = createShorthand(
       'span',
       val => ({ children: val }),
       content || text,
-      { defaultProps: { className: 'text' } }
+      { defaultProps: { className: 'text' } },
     )
 
     return (

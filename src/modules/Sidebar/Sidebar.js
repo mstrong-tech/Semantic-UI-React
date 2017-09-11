@@ -57,10 +57,7 @@ class Sidebar extends Component {
   }
 
   static Pushable = SidebarPushable
-
   static Pusher = SidebarPusher
-
-  state = {}
 
   startAnimating = (duration = 500) => {
     clearTimeout(this.stopAnimatingTimer)
@@ -95,7 +92,7 @@ class Sidebar extends Component {
       useKeyOnly(animating, 'animating'),
       useKeyOnly(visible, 'visible'),
       'sidebar',
-      className
+      className,
     )
 
     const rest = getUnhandledProps(Sidebar, this.props)

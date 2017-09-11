@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { SemanticWIDTHS } from '../..';
+
+import { SemanticShorthandCollection, SemanticWIDTHS } from '../..';
+import { CardProps } from './Card';
 
 export interface CardGroupProps {
   [key: string]: any;
@@ -17,13 +19,16 @@ export interface CardGroupProps {
   doubling?: boolean;
 
   /** Shorthand array of props for Card. */
-  items?: Array<any>;
+  items?: SemanticShorthandCollection<CardProps>;
 
   /** A group of cards can set how many cards should exist in a row. */
   itemsPerRow?: SemanticWIDTHS;
 
   /** A group of cards can automatically stack rows to a single columns on mobile devices. */
   stackable?: boolean;
+
+  /** A card group can adjust its text alignment. */
+  textAlign?: 'center' | 'left' | 'right';
 }
 
 declare const CardGroup: React.StatelessComponent<CardGroupProps>;

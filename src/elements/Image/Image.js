@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   createShorthandFactory,
   customPropTypes,
   getElementType,
@@ -70,10 +71,10 @@ function Image(props) {
   )
   const rest = getUnhandledProps(Image, props)
   const ElementType = getElementType(Image, props, () => {
-    if (!_.isNil(dimmer) || !_.isNil(label) || !_.isNil(wrapped) || !_.isNil(children)) return 'div'
+    if (!_.isNil(dimmer) || !_.isNil(label) || !_.isNil(wrapped) || !childrenUtils.isNil(children)) return 'div'
   })
 
-  if (!_.isNil(children)) {
+  if (!childrenUtils.isNil(children)) {
     return <ElementType {...rest} className={classes}>{children}</ElementType>
   }
 
@@ -181,11 +182,7 @@ Image.propTypes = {
   ]),
 
   /** An image can render wrapped in a `div.ui.image` as alternative HTML markup. */
-  wrapped: customPropTypes.every([
-    PropTypes.bool,
-    // these props wrap the image in an a tag already
-    customPropTypes.disallow(['href']),
-  ]),
+  wrapped: PropTypes.bool,
 }
 
 Image.defaultProps = {

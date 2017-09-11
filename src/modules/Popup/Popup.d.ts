@@ -1,8 +1,9 @@
 import * as React from 'react';
 
+import { SemanticShorthandItem } from '../..';
 import { PortalProps } from '../../addons/Portal';
-import { default as PopupContent } from './PopupContent';
-import { default as PopupHeader } from './PopupHeader';
+import { default as PopupContent, PopupContentProps } from './PopupContent';
+import { default as PopupHeader, PopupHeaderProps } from './PopupHeader';
 
 export interface PopupProps extends PortalProps {
   [key: string]: any;
@@ -17,13 +18,13 @@ export interface PopupProps extends PortalProps {
   className?: string;
 
   /** Simple text content for the popover. */
-  content?: React.ReactNode;
+  content?: SemanticShorthandItem<PopupContentProps>;
 
   /** A Flowing popup have no maximum width and continue to flow to fit its content. */
   flowing?: boolean;
 
   /** Header displayed above the content in bold. */
-  header?: any;
+  header?: SemanticShorthandItem<PopupHeaderProps>;
 
   /** The node where the popup should mount. */
   hideOnScroll?: boolean;
@@ -37,8 +38,8 @@ export interface PopupProps extends PortalProps {
   /** Horizontal offset in pixels to be applied to the popup. */
   offset?: number | Array<number>;
 
-  /** Event triggering the popup. */
-  on?: 'hover' | 'click' | 'focus';
+  /** Events triggering the popup. */
+  on?: 'hover' | 'click' | 'focus' | Array<'hover' | 'click' | 'focus'>;
 
   /**
    * Called when a close event happens.

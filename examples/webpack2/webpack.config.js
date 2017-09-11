@@ -2,6 +2,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const path = require('path')
 const webpack = require('webpack')
 
+const analyze = !!process.env.ANALYZE_ENV
 const env = process.env.NODE_ENV || 'development'
 
 const webpackConfig = {
@@ -26,7 +27,6 @@ const webpackConfig = {
         NODE_ENV: JSON.stringify(env),
       },
     }),
-    new BundleAnalyzerPlugin(),
   ],
 
   output: {
@@ -44,6 +44,10 @@ const webpackConfig = {
   },
 }
 
+if (analyze) {
+  webpackConfig.plugins.push(new BundleAnalyzerPlugin())
+}
+
 if (env === 'production') {
   webpackConfig.plugins.push(
     new webpack.LoaderOptionsPlugin({
@@ -56,7 +60,7 @@ if (env === 'production') {
         dead_code: true,
         warnings: false,
       },
-    })
+    }),
   )
 }
 

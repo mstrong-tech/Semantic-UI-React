@@ -1,5 +1,4 @@
 import React from 'react'
-import { findDOMNode } from 'react-dom'
 
 import Checkbox from 'src/modules/Checkbox/Checkbox'
 import * as common from 'test/specs/commonTests'
@@ -19,6 +18,16 @@ describe('Checkbox', () => {
 
   common.implementsHTMLLabelProp(Checkbox, {
     alwaysPresent: true,
+  })
+
+  describe('aria', () => {
+    ['aria-label', 'role'].forEach((propName) => {
+      it(`passes "${propName}" to the <input>`, () => {
+        shallow(<Checkbox {...{ [propName]: 'foo' }} />)
+          .find('input')
+          .should.have.prop(propName)
+      })
+    })
   })
 
   describe('checking', () => {
@@ -49,8 +58,7 @@ describe('Checkbox', () => {
   describe('indeterminate', () => {
     it('can be indeterminate', () => {
       const wrapper = mount(<Checkbox indeterminate />)
-
-      const checkboxNode = findDOMNode(wrapper.instance())
+      const checkboxNode = wrapper.getDOMNode()
       const input = checkboxNode.querySelector('input')
 
       input.indeterminate.should.be.true()
@@ -60,8 +68,7 @@ describe('Checkbox', () => {
     })
     it('can not be indeterminate', () => {
       const wrapper = mount(<Checkbox indeterminate={false} />)
-
-      const checkboxNode = findDOMNode(wrapper.instance())
+      const checkboxNode = wrapper.getDOMNode()
       const input = checkboxNode.querySelector('input')
 
       input.indeterminate.should.be.false()
@@ -74,8 +81,7 @@ describe('Checkbox', () => {
   describe('defaultIndeterminate', () => {
     it('sets the initial indeterminate state', () => {
       const wrapper = mount(<Checkbox defaultIndeterminate />)
-
-      const checkboxNode = findDOMNode(wrapper.instance())
+      const checkboxNode = wrapper.getDOMNode()
       const input = checkboxNode.querySelector('input')
 
       input.indeterminate.should.be.true()
@@ -83,9 +89,8 @@ describe('Checkbox', () => {
 
     it('unsets indeterminate state on any click', () => {
       const wrapper = mount(<Checkbox defaultIndeterminate />)
-
-      const checkboxNode = findDOMNode(wrapper.instance())
-      const input = findDOMNode(checkboxNode.querySelector('input'))
+      const checkboxNode = wrapper.getDOMNode()
+      const input = checkboxNode.querySelector('input')
 
       input.indeterminate.should.be.true()
 
@@ -150,7 +155,7 @@ describe('Checkbox', () => {
       spy.should.have.been.calledOnce()
       spy.should.have.been.calledWithMatch({}, {
         ...expectProps,
-        checked: expectProps.checked,
+        checked: !expectProps.checked,
         indeterminate: expectProps.indeterminate,
       })
     })
@@ -162,6 +167,26 @@ describe('Checkbox', () => {
   })
 
   describe('onMouseDown', () => {
+    it('is called with (event { name, value, checked }) on label mouse down', () => {
+      const onMousedDown = sandbox.spy()
+      const expectProps = { name: 'foo', value: 'bar', checked: false, indeterminate: true }
+      mount(<Checkbox onMouseDown={onMousedDown} {...expectProps} />)
+        .simulate('mousedown')
+
+      onMousedDown.should.have.been.calledOnce()
+      onMousedDown.should.have.been.calledWithMatch({}, {
+        ...expectProps,
+        checked: expectProps.checked,
+        indeterminate: expectProps.indeterminate,
+      })
+    })
+    it('prevents default event', () => {
+      const preventDefault = sandbox.spy()
+      const wrapper = shallow(<Checkbox />)
+
+      wrapper.simulate('mousedown', { preventDefault })
+      preventDefault.should.have.been.calledOnce()
+    })
     it('sets focus to container', () => {
       const mountNode = document.createElement('div')
       document.body.appendChild(mountNode)

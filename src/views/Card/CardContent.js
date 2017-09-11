@@ -4,12 +4,15 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   createShorthand,
   customPropTypes,
   getElementType,
   getUnhandledProps,
   META,
+  SUI,
   useKeyOnly,
+  useTextAlignProp,
 } from '../../lib'
 import CardDescription from './CardDescription'
 import CardHeader from './CardHeader'
@@ -26,17 +29,19 @@ function CardContent(props) {
     extra,
     header,
     meta,
+    textAlign,
   } = props
 
   const classes = cx(
-    className,
     useKeyOnly(extra, 'extra'),
+    useTextAlignProp(textAlign),
     'content',
+    className,
   )
   const rest = getUnhandledProps(CardContent, props)
   const ElementType = getElementType(CardContent, props)
 
-  if (!_.isNil(children)) {
+  if (!childrenUtils.isNil(children)) {
     return <ElementType {...rest} className={classes}>{children}</ElementType>
   }
 
@@ -76,6 +81,9 @@ CardContent.propTypes = {
 
   /** Shorthand for CardMeta. */
   meta: customPropTypes.itemShorthand,
+
+  /** A card content can adjust its text alignment. */
+  textAlign: PropTypes.oneOf(_.without(SUI.TEXT_ALIGNMENTS, 'justified')),
 }
 
 export default CardContent

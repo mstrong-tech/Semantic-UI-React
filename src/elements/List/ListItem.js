@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import React, { Component, isValidElement } from 'react'
 
 import {
+  childrenUtils,
   createShorthandFactory,
   customPropTypes,
   getElementType,
@@ -12,7 +13,6 @@ import {
   useKeyOnly,
 } from '../../lib'
 import Image from '../../elements/Image'
-
 import ListContent from './ListContent'
 import ListDescription from './ListDescription'
 import ListHeader from './ListHeader'
@@ -87,9 +87,9 @@ class ListItem extends Component {
   }
 
   handleClick = (e) => {
-    const { onClick } = this.props
+    const { disabled } = this.props
 
-    if (onClick) onClick(e, this.props)
+    if (!disabled) _.invoke(this.props, 'onClick', e, this.props)
   }
 
   render() {
@@ -116,7 +116,7 @@ class ListItem extends Component {
     const rest = getUnhandledProps(ListItem, this.props)
     const valueProp = ElementType === 'li' ? { value } : { 'data-value': value }
 
-    if (!_.isNil(children)) {
+    if (!childrenUtils.isNil(children)) {
       return (
         <ElementType {...rest} {...valueProp} role='listitem' className={classes} onClick={this.handleClick}>
           {children}

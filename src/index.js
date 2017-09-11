@@ -1,4 +1,5 @@
 // Addons
+export { default as Responsive } from './addons/Responsive'
 export { default as Confirm } from './addons/Confirm'
 export { default as Portal } from './addons/Portal'
 export { default as Radio } from './addons/Radio'
@@ -114,6 +115,7 @@ export { default as DropdownDivider } from './modules/Dropdown/DropdownDivider'
 export { default as DropdownHeader } from './modules/Dropdown/DropdownHeader'
 export { default as DropdownItem } from './modules/Dropdown/DropdownItem'
 export { default as DropdownMenu } from './modules/Dropdown/DropdownMenu'
+export { default as DropdownSearchInput } from './modules/Dropdown/DropdownSearchInput'
 
 export { default as Embed } from './modules/Embed'
 
@@ -140,6 +142,14 @@ export { default as SearchResults } from './modules/Search/SearchResults'
 export { default as Sidebar } from './modules/Sidebar'
 export { default as SidebarPushable } from './modules/Sidebar/SidebarPushable'
 export { default as SidebarPusher } from './modules/Sidebar/SidebarPusher'
+
+export { default as Sticky } from './modules/Sticky'
+
+export { default as Tab } from './modules/Tab'
+export { default as TabPane } from './modules/Tab/TabPane'
+
+export { default as Transition } from './modules/Transition'
+export { default as TransitionGroup } from './modules/Transition/TransitionGroup'
 
 // Views
 export { default as Advertisement } from './views/Advertisement'

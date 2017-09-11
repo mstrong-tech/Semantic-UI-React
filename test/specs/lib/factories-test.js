@@ -14,7 +14,7 @@ import { sandbox } from 'test/utils'
 const getShorthand = ({
   Component = 'div',
   defaultProps,
-  mapValueToProps = val => ({}),
+  mapValueToProps = () => ({}),
   overrideProps,
   value,
 }) => createShorthand(Component, mapValueToProps, value, { defaultProps, overrideProps })
@@ -124,7 +124,7 @@ describe('factories', () => {
     it('throw if passed Component that is not a string nor function', () => {
       const badComponents = [undefined, null, true, false, [], {}, 123]
 
-      _.each(badComponents, badComponent => {
+      _.each(badComponents, (badComponent) => {
         const badUsage = () => createShorthandFactory(badComponent, () => ({}))
 
         expect(badUsage).to.throw()
@@ -152,7 +152,7 @@ describe('factories', () => {
     it('throw if passed Component that is not a string nor function', () => {
       const badComponents = [undefined, null, true, false, [], {}, 123]
 
-      _.each(badComponents, badComponent => {
+      _.each(badComponents, (badComponent) => {
         const badUsage = () => createShorthand(badComponent, () => ({}))
 
         expect(badUsage).to.throw()
@@ -168,55 +168,119 @@ describe('factories', () => {
       })
     })
 
-    describe('child key', () => {
-      it('uses the `key` prop from an element', () => {
-        getShorthand({ value: <div key='foo' /> })
-          .should.have.property('key', 'foo')
-      })
-
-      it('uses the `key` prop as a string', () => {
-        getShorthand({ value: { key: 'foo' } })
-          .should.have.property('key', 'foo')
-      })
-
-      it('uses the `key` prop as a number', () => {
+    describe('key', () => {
+      it('is not consumed', () => {
         getShorthand({ value: { key: 123 } })
-          .should.have.property('key', '123')
+          .props.should.have.property('key')
       })
 
-      it('uses the `childKey` prop as a string', () => {
-        getShorthand({ value: { childKey: 'foo' } })
-          .should.have.property('key', 'foo')
+      describe('on an element', () => {
+        it('works with a string', () => {
+          getShorthand({ value: <div key='foo' /> })
+            .should.have.property('key', 'foo')
+        })
+
+        it('works with a number', () => {
+          getShorthand({ value: <div key={123} /> })
+            .should.have.property('key', '123')
+        })
+
+        it('works with falsy values', () => {
+          getShorthand({ value: <div key={null} /> })
+            .should.have.property('key', 'null')
+
+          getShorthand({ value: <div key={0} /> })
+            .should.have.property('key', '0')
+
+          getShorthand({ value: <div key='' /> })
+            .should.have.property('key', '')
+        })
       })
 
-      it('uses the `childKey` prop as a number', () => {
-        getShorthand({ value: { childKey: 123 } })
-          .should.have.property('key', '123')
+      describe('on an object', () => {
+        it('works with a string', () => {
+          getShorthand({ value: { key: 'foo' } })
+            .should.have.property('key', 'foo')
+        })
+
+        it('works with a number', () => {
+          getShorthand({ value: { key: 123 } })
+            .should.have.property('key', '123')
+        })
+
+        it('works with falsy values', () => {
+          getShorthand({ value: { key: null } })
+            .should.have.property('key', 'null')
+
+          getShorthand({ value: { key: 0 } })
+            .should.have.property('key', '0')
+
+          getShorthand({ value: { key: '' } })
+            .should.have.property('key', '')
+        })
       })
+    })
 
-      it('calls `childKey` with the final `props` if it is a function', () => {
-        const props = { foo: 'foo', childKey: sandbox.spy(({ foo }) => foo) }
-        const element = getShorthand({ value: props })
-
-        props.childKey.should.have.been.calledOnce()
-        props.childKey.should.have.been.calledWithExactly({ foo: 'foo', key: 'foo' })
-
-        element.key.should.equal('foo')
-      })
-
-      it('consumes the childKey prop', () => {
+    describe('childKey', () => {
+      it('is consumed', () => {
         getShorthand({ value: { childKey: 123 } })
           .props.should.not.have.property('childKey')
       })
 
-      it('is generated from shorthand string values', () => {
-        getShorthand({ value: 'foo' })
-          .should.have.property('key', 'foo')
+      it('is called with the final `props` if it is a function', () => {
+        const props = { foo: 'bar', childKey: sandbox.spy(({ foo }) => foo) }
+        const element = getShorthand({ value: props })
+
+        props.childKey.should.have.been.calledOnce()
+        props.childKey.should.have.been.calledWithExactly({ foo: 'bar', key: 'bar' })
+
+        element.key.should.equal('bar')
       })
 
-      it('is generated from shorthand number values', () => {
-        getShorthand({ value: 123 })
-          .should.have.property('key', '123')
+      describe('on an element', () => {
+        it('works with a string', () => {
+          getShorthand({ value: <div childKey='foo' /> })
+            .should.have.property('key', 'foo')
+        })
+
+        it('works with a number', () => {
+          getShorthand({ value: <div childKey={123} /> })
+            .should.have.property('key', '123')
+        })
+
+        it('works with falsy values', () => {
+          getShorthand({ value: <div childKey={null} /> })
+            .should.have.property('key', null)
+
+          getShorthand({ value: <div childKey={0} /> })
+            .should.have.property('key', '0')
+
+          getShorthand({ value: <div childKey='' /> })
+            .should.have.property('key', '')
+        })
+      })
+
+      describe('on an object', () => {
+        it('works with a string', () => {
+          getShorthand({ value: { childKey: 'foo' } })
+            .should.have.property('key', 'foo')
+        })
+
+        it('works with a number', () => {
+          getShorthand({ value: { childKey: 123 } })
+            .should.have.property('key', '123')
+        })
+
+        it('works with falsy values', () => {
+          getShorthand({ value: { childKey: null } })
+            .should.have.property('key', null)
+
+          getShorthand({ value: { childKey: 0 } })
+            .should.have.property('key', '0')
+
+          getShorthand({ value: { childKey: '' } })
+            .should.have.property('key', '')
+        })
       })
     })
 
@@ -260,7 +324,7 @@ describe('factories', () => {
         const defaultProps = { 'data-some': 'defaults' }
         const overrideProps = sandbox.spy(() => ({}))
         const value = 'foo'
-        const mapValueToProps = (val) => ({ 'data-mapped': val })
+        const mapValueToProps = val => ({ 'data-mapped': val })
 
         shallow(getShorthand({ defaultProps, mapValueToProps, overrideProps, value }))
         overrideProps.should.have.been.calledWith({ ...defaultProps, ...mapValueToProps(value) })
@@ -297,7 +361,7 @@ describe('factories', () => {
         'element',
         { some: 'defaults', overridden: false },
         { some: 'defaults', overridden: true },
-        { value: <div overridden /> }
+        { value: <div overridden /> },
       )
       itOverridesDefaultPropsWithFalseyProps('element', {
         value: <div undef={undefined} nil={null} zero={0} empty='' />,
@@ -323,8 +387,8 @@ describe('factories', () => {
         { some: 'defaults', overridden: true },
         {
           value: 'a string',
-          mapValueToProps: (val) => ({ overridden: true }),
-        }
+          mapValueToProps: () => ({ overridden: true }),
+        },
       )
 
       itOverridesDefaultPropsWithFalseyProps('mapValueToProps', {
@@ -347,7 +411,7 @@ describe('factories', () => {
         { some: 'defaults', overridden: true },
         {
           value: { overridden: true },
-        }
+        },
       )
 
       itOverridesDefaultPropsWithFalseyProps('props object', {
@@ -374,8 +438,8 @@ describe('factories', () => {
         { some: 'defaults', overridden: true },
         {
           value: ['an array'],
-          mapValueToProps: (val) => ({ overridden: true }),
-        }
+          mapValueToProps: () => ({ overridden: true }),
+        },
       )
 
       itOverridesDefaultPropsWithFalseyProps('mapValueToProps', {

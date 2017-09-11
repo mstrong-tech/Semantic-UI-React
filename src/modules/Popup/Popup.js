@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
@@ -73,8 +74,11 @@ export default class Popup extends Component {
       PropTypes.number,
     ]),
 
-    /** Event triggering the popup. */
-    on: PropTypes.oneOf(['hover', 'click', 'focus']),
+    /** Events triggering the popup. */
+    on: PropTypes.oneOfType([
+      PropTypes.oneOf(['hover', 'click', 'focus']),
+      PropTypes.arrayOf(PropTypes.oneOf(['hover', 'click', 'focus'])),
+    ]),
 
     /**
      * Called when a close event happens.
@@ -178,7 +182,7 @@ export default class Popup extends Component {
     } else if (_.includes(positions, 'left')) {
       style.left = Math.round(this.coords.left + pageXOffset)
       style.right = 'auto'
-    } else {  // if not left nor right, we are horizontally centering the element
+    } else { // if not left nor right, we are horizontally centering the element
       const xOffset = (this.coords.width - this.popupCoords.width) / 2
       style.left = Math.round(this.coords.left + xOffset + pageXOffset)
       style.right = 'auto'
@@ -190,9 +194,9 @@ export default class Popup extends Component {
     } else if (_.includes(positions, 'bottom')) {
       style.top = Math.round(this.coords.bottom + pageYOffset)
       style.bottom = 'auto'
-    } else {  // if not top nor bottom, we are vertically centering the element
+    } else { // if not top nor bottom, we are vertically centering the element
       const yOffset = (this.coords.height + this.popupCoords.height) / 2
-      style.top = Math.round(this.coords.bottom + pageYOffset - yOffset)
+      style.top = Math.round((this.coords.bottom + pageYOffset) - yOffset)
       style.bottom = 'auto'
 
       const xOffset = this.popupCoords.width + 8
@@ -244,14 +248,14 @@ export default class Popup extends Component {
 
     // Lets detect if the popup is out of the viewport and adjust
     // the position accordingly
-    const positions = _.without(POSITIONS, position)
-    for (let i = 0; !this.isStyleInViewport(style) && i < positions.length; i++) {
+    const positions = _.without(POSITIONS, position).concat([position])
+    for (let i = 0; !this.isStyleInViewport(style) && i < positions.length; i += 1) {
       style = this.computePopupStyle(positions[i])
       position = positions[i]
     }
 
     // Append 'px' to every numerical values in the style
-    style = _.mapValues(style, value => _.isNumber(value) ? value + 'px' : value)
+    style = _.mapValues(style, value => (_.isNumber(value) ? `${value}px` : value))
     this.setState({ style, position })
   }
 
@@ -259,20 +263,22 @@ export default class Popup extends Component {
     const portalProps = {}
 
     const { on, hoverable } = this.props
+    const normalizedOn = _.isArray(on) ? on : [on]
 
     if (hoverable) {
       portalProps.closeOnPortalMouseLeave = true
       portalProps.mouseLeaveDelay = 300
     }
-
-    if (on === 'click') {
+    if (_.includes(normalizedOn, 'click')) {
       portalProps.openOnTriggerClick = true
       portalProps.closeOnTriggerClick = true
       portalProps.closeOnDocumentClick = true
-    } else if (on === 'focus') {
+    }
+    if (_.includes(normalizedOn, 'focus')) {
       portalProps.openOnTriggerFocus = true
       portalProps.closeOnTriggerBlur = true
-    } else if (on === 'hover') {
+    }
+    if (_.includes(normalizedOn, 'hover')) {
       portalProps.openOnTriggerMouseEnter = true
       portalProps.closeOnTriggerMouseLeave = true
       // Taken from SUI: https://git.io/vPmCm
@@ -283,7 +289,7 @@ export default class Popup extends Component {
     return portalProps
   }
 
-  hideOnScroll = (e) => {
+  hideOnScroll = () => {
     this.setState({ closed: true })
     window.removeEventListener('scroll', this.hideOnScroll)
     setTimeout(() => this.setState({ closed: false }), 50)
@@ -365,8 +371,8 @@ export default class Popup extends Component {
     const popupJSX = (
       <ElementType {...rest} className={classes} style={style} ref={this.handlePopupRef}>
         {children}
-        {_.isNil(children) && PopupHeader.create(header)}
-        {_.isNil(children) && PopupContent.create(content)}
+        {childrenUtils.isNil(children) && PopupHeader.create(header)}
+        {childrenUtils.isNil(children) && PopupContent.create(content)}
       </ElementType>
     )
 

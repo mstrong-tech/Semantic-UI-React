@@ -1,6 +1,8 @@
 import React from 'react'
+
 import ComponentExample from 'docs/app/Components/ComponentDoc/ComponentExample'
 import ExampleSection from 'docs/app/Components/ComponentDoc/ExampleSection'
+import ShorthandExample from 'docs/app/Components/ComponentDoc/ShorthandExample'
 
 const DropdownUsageExamples = () => (
   <ExampleSection title='Usage'>
@@ -75,6 +77,11 @@ const DropdownUsageExamples = () => (
       title='Item Content'
       description='A dropdown item can be rendered differently inside the menu.'
       examplePath='modules/Dropdown/Usage/DropdownExampleItemContent'
+    />
+    <ShorthandExample
+      title='Search Input'
+      description='A dropdown implements a search input shorthand.'
+      examplePath='modules/Dropdown/Usage/DropdownExampleSearchInput'
     />
     <ComponentExample
       title='Upward'

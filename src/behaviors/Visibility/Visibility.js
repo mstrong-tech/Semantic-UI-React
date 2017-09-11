@@ -7,6 +7,8 @@ import {
   getElementType,
   getUnhandledProps,
   META,
+  normalizeOffset,
+  isBrowser,
 } from '../../lib'
 
 /**
@@ -20,11 +22,17 @@ export default class Visibility extends Component {
     /** Primary content. */
     children: PropTypes.node,
 
+    /** Context which visibility should attach onscroll events. */
+    context: PropTypes.object,
+
     /**
      * When set to true a callback will occur anytime an element passes a condition not just immediately after the
      * threshold is met.
      */
     continuous: PropTypes.bool,
+
+    /** Fires callbacks immediately after mount. */
+    fireOnMount: PropTypes.bool,
 
     /**
      * Element's bottom edge has passed top of screen.
@@ -57,6 +65,19 @@ export default class Visibility extends Component {
      * @param {object} data - All props.
      */
     onBottomVisibleReverse: PropTypes.func,
+
+    /**
+     * Value that context should be adjusted in pixels. Useful for making content appear below content fixed to the
+     * page.
+     */
+    offset: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.string,
+      PropTypes.arrayOf([
+        PropTypes.number,
+        PropTypes.string,
+      ]),
+    ]),
 
     /** When set to false a callback will occur each time an element passes the threshold for a condition. */
     once: PropTypes.bool,
@@ -138,7 +159,9 @@ export default class Visibility extends Component {
   }
 
   static defaultProps = {
+    context: isBrowser ? window : null,
     continuous: false,
+    offset: [0, 0],
     once: true,
   }
 
@@ -166,11 +189,19 @@ export default class Visibility extends Component {
   }
 
   componentDidMount() {
-    window.addEventListener('scroll', this.handleScroll)
+    if (!isBrowser) return
+
+    const { context, fireOnMount } = this.props
+
+    context.addEventListener('scroll', this.handleScroll)
+    if (fireOnMount) this.handleUpdate()
   }
 
   componentWillUnmount() {
-    window.removeEventListener('scroll', this.handleScroll)
+    if (!isBrowser) return
+
+    const { context } = this.props
+    context.removeEventListener('scroll', this.handleScroll)
   }
 
   execute = (callback, name) => {
@@ -261,19 +292,30 @@ export default class Visibility extends Component {
     })
   }
 
+  handleScroll = () => {
+    if (this.ticking) return
+
+    this.ticking = true
+    requestAnimationFrame(this.handleUpdate)
+  }
+
   handleRef = c => (this.ref = c)
 
-  handleScroll = () => {
-    const { bottom, height, top, width } = this.ref.getBoundingClientRect()
+  handleUpdate = () => {
+    this.ticking = false
 
-    const topPassed = top < 0
-    const bottomPassed = bottom < 0
+    const { offset } = this.props
+    const { bottom, height, top, width } = this.ref.getBoundingClientRect()
+    const [topOffset, bottomOffset] = normalizeOffset(offset)
+
+    const topPassed = top < topOffset
+    const bottomPassed = bottom < bottomOffset
 
     const pixelsPassed = bottomPassed ? 0 : Math.max(top * -1, 0)
     const percentagePassed = pixelsPassed / height
 
-    const bottomVisible = bottom >= 0 && bottom <= window.innerHeight
-    const topVisible = top >= 0 && top <= window.innerHeight
+    const bottomVisible = bottom >= bottomOffset && bottom <= window.innerHeight
+    const topVisible = top >= topOffset && top <= window.innerHeight
 
     const fits = topVisible && bottomVisible
     const passing = topPassed && !bottomPassed

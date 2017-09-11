@@ -5,6 +5,7 @@ import React from 'react'
 
 import {
   AutoControlledComponent as Component,
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
@@ -32,8 +33,8 @@ class Modal extends Component {
     /** An element type to render as (string or function). */
     as: customPropTypes.as,
 
-    /** Elements to render as Modal action buttons. */
-    actions: PropTypes.arrayOf(customPropTypes.itemShorthand),
+    /** Shorthand for Modal.Actions. Typically an array of button shorthand. */
+    actions: customPropTypes.itemShorthand,
 
     /** A modal can reduce its complexity */
     basic: PropTypes.bool,
@@ -44,7 +45,7 @@ class Modal extends Component {
     /** Additional classes. */
     className: PropTypes.string,
 
-    /** Icon. */
+    /** Shorthand for the close icon. Closes the modal on click. */
     closeIcon: PropTypes.oneOfType([
       PropTypes.node,
       PropTypes.object,
@@ -74,6 +75,14 @@ class Modal extends Component {
 
     /** The node where the modal should mount. Defaults to document.body. */
     mountNode: PropTypes.any,
+
+    /**
+     * Action onClick handler when using shorthand `actions`.
+     *
+     * @param {SyntheticEvent} event - React's original SyntheticEvent.
+     * @param {object} data - All props.
+     */
+    onActionClick: PropTypes.func,
 
     /**
      * Called when a close event happens.
@@ -111,7 +120,7 @@ class Modal extends Component {
     open: PropTypes.bool,
 
     /** A modal can vary in size */
-    size: PropTypes.oneOf(['fullscreen', 'large', 'small']),
+    size: PropTypes.oneOf(['fullscreen', 'large', 'mini', 'small', 'tiny']),
 
     /** Custom styles. */
     style: PropTypes.object,
@@ -142,22 +151,20 @@ class Modal extends Component {
   static Description = ModalDescription
   static Actions = ModalActions
 
-  state = {}
-
   componentWillUnmount() {
     debug('componentWillUnmount()')
     this.handlePortalUnmount()
   }
 
   // Do not access document when server side rendering
-  getMountNode = () => isBrowser ? this.props.mountNode || document.body : null
+  getMountNode = () => (isBrowser ? this.props.mountNode || document.body : null)
 
   handleActionsOverrides = predefinedProps => ({
     onActionClick: (e, actionProps) => {
-      const { triggerClose } = actionProps
-
       _.invoke(predefinedProps, 'onActionClick', e, actionProps)
-      if (triggerClose) this.handleClose(e)
+      _.invoke(this.props, 'onActionClick', e, this.props)
+
+      this.handleClose(e)
     },
   })
 
@@ -171,7 +178,7 @@ class Modal extends Component {
   }
 
   handleIconOverrides = predefinedProps => ({
-    onClick: e => {
+    onClick: (e) => {
       _.invoke(predefinedProps, 'onClick', e)
       this.handleClose(e)
     },
@@ -193,7 +200,8 @@ class Modal extends Component {
 
     if (dimmer) {
       debug('adding dimmer')
-      mountNode.classList.add('dimmable', 'dimmed')
+      mountNode.classList.add('dimmable')
+      mountNode.classList.add('dimmed')
 
       if (dimmer === 'blurring') {
         debug('adding blurred dimmer')
@@ -214,7 +222,12 @@ class Modal extends Component {
     // If the dimmer value changes while the modal is open, then removing its
     // current value could leave cruft classes previously added.
     const mountNode = this.getMountNode()
-    mountNode.classList.remove('blurring', 'dimmable', 'dimmed', 'scrollable')
+
+    // Heads up, IE doesn't support second argument in remove()
+    mountNode.classList.remove('blurring')
+    mountNode.classList.remove('dimmable')
+    mountNode.classList.remove('dimmed')
+    mountNode.classList.remove('scrolling')
 
     cancelAnimationFrame(this.animationRequestId)
 
@@ -254,7 +267,7 @@ class Modal extends Component {
     this.animationRequestId = requestAnimationFrame(this.setPosition)
   }
 
-  renderContent = rest => {
+  renderContent = (rest) => {
     const {
       actions,
       basic,
@@ -281,7 +294,7 @@ class Modal extends Component {
     const closeIconName = closeIcon === true ? 'close' : closeIcon
     const closeIconJSX = Icon.create(closeIconName, { overrideProps: this.handleIconOverrides })
 
-    if (!_.isNil(children)) {
+    if (!childrenUtils.isNil(children)) {
       return (
         <ElementType {...rest} className={classes} style={{ marginTop, ...style }} ref={this.handleRef}>
           {closeIconJSX}

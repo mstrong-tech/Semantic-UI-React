@@ -1,9 +1,14 @@
 // Addons
+export {
+  default as Responsive,
+  ResponsiveProps,
+  ResponsiveWidthShorthand
+} from './dist/commonjs/addons/Responsive';
 export { default as Confirm, ConfirmProps } from './dist/commonjs/addons/Confirm';
 export { default as Portal, PortalProps } from './dist/commonjs/addons/Portal';
 export { default as Radio, RadioProps } from './dist/commonjs/addons/Radio';
 export { default as Select, SelectProps } from './dist/commonjs/addons/Select';
-export { default as TextArea, TextAreaProps, TextAreaOnChangeData } from './dist/commonjs/addons/TextArea';
+export { default as TextArea, TextAreaProps } from './dist/commonjs/addons/TextArea';
 
 // Behaviors
 export {
@@ -25,7 +30,7 @@ export {
   BreadcrumbSectionProps
 } from './dist/commonjs/collections/Breadcrumb/BreadcrumbSection';
 
-export { default as Form, FormProps } from './dist/commonjs/collections/Form';
+export { default as Form, FormComponent, FormProps } from './dist/commonjs/collections/Form';
 export { default as FormButton, FormButtonProps } from './dist/commonjs/collections/Form/FormButton';
 export { default as FormCheckbox, FormCheckboxProps } from './dist/commonjs/collections/Form/FormCheckbox';
 export { default as FormDropdown, FormDropdownProps } from './dist/commonjs/collections/Form/FormDropdown';
@@ -129,6 +134,10 @@ export { default as DropdownDivider, DropdownDividerProps } from './dist/commonj
 export { default as DropdownHeader, DropdownHeaderProps } from './dist/commonjs/modules/Dropdown/DropdownHeader';
 export { default as DropdownItem, DropdownItemProps } from './dist/commonjs/modules/Dropdown/DropdownItem';
 export { default as DropdownMenu, DropdownMenuProps } from './dist/commonjs/modules/Dropdown/DropdownMenu';
+export {
+  default as DropdownSearchInput,
+  DropdownSearchInputProps
+} from './dist/commonjs/modules/Dropdown/DropdownSearchInput';
 
 export { default as Embed, EmbedProps } from './dist/commonjs/modules/Embed';
 
@@ -147,7 +156,7 @@ export { default as Progress, ProgressProps } from './dist/commonjs/modules/Prog
 export { default as Rating, RatingProps } from './dist/commonjs/modules/Rating';
 export { default as RatingIcon, RatingIconProps } from './dist/commonjs/modules/Rating/RatingIcon';
 
-export { default as Search, SearchProps } from './dist/commonjs/modules/Search';
+export { default as Search, SearchProps, SearchResultData } from './dist/commonjs/modules/Search';
 export { default as SearchCategory, SearchCategoryProps } from './dist/commonjs/modules/Search/SearchCategory';
 export { default as SearchResult, SearchResultProps } from './dist/commonjs/modules/Search/SearchResult';
 export { default as SearchResults, SearchResultsProps } from './dist/commonjs/modules/Search/SearchResults';
@@ -155,6 +164,19 @@ export { default as SearchResults, SearchResultsProps } from './dist/commonjs/mo
 export { default as Sidebar, SidebarProps } from './dist/commonjs/modules/Sidebar';
 export { default as SidebarPushable, SidebarPushableProps } from './dist/commonjs/modules/Sidebar/SidebarPushable';
 export { default as SidebarPusher, SidebarPusherProps } from './dist/commonjs/modules/Sidebar/SidebarPusher';
+
+export { default as Sticky, StickyProps } from './dist/commonjs/modules/Sticky';
+
+export { default as Tab, TabProps } from './dist/commonjs/modules/Tab';
+export { default as TabPane, TabPaneProps } from './dist/commonjs/modules/Tab/TabPane';
+
+export {
+  default as Transition,
+  TransitionProps,
+  TransitionPropDuration,
+  TRANSITION_STATUSES
+} from './dist/commonjs/modules/Transition';
+export { default as TransitionGroup, TransitionGroupProps } from './dist/commonjs/modules/Transition/TransitionGroup';
 
 // Views
 export { default as Advertisement, AdvertisementProps } from './dist/commonjs/views/Advertisement';

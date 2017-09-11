@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
 import {
+  childrenUtils,
   createShorthand,
   createShorthandFactory,
   customPropTypes,
@@ -135,7 +136,7 @@ export default class Label extends Component {
   }
 
   handleIconOverrides = predefinedProps => ({
-    onClick: e => {
+    onClick: (e) => {
       _.invoke(predefinedProps, 'onClick', e)
       _.invoke(this.props, 'onRemove', e, this.props)
     },
@@ -166,9 +167,9 @@ export default class Label extends Component {
       tag,
     } = this.props
 
-    const pointingClass = pointing === true && 'pointing'
-      || (pointing === 'left' || pointing === 'right') && `${pointing} pointing`
-      || (pointing === 'above' || pointing === 'below') && `pointing ${pointing}`
+    const pointingClass = (pointing === true && 'pointing')
+      || ((pointing === 'left' || pointing === 'right') && `${pointing} pointing`)
+      || ((pointing === 'above' || pointing === 'below') && `pointing ${pointing}`)
 
     const classes = cx(
       'ui',
@@ -192,7 +193,7 @@ export default class Label extends Component {
     const rest = getUnhandledProps(Label, this.props)
     const ElementType = getElementType(Label, this.props)
 
-    if (!_.isNil(children)) {
+    if (!childrenUtils.isNil(children)) {
       return <ElementType {...rest} className={classes} onClick={this.handleClick}>{children}</ElementType>
     }
 

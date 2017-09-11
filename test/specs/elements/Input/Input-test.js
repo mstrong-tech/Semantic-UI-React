@@ -55,7 +55,6 @@ describe('Input', () => {
 
   common.implementsButtonProp(Input, {
     propKey: 'action',
-    shorthandDefaultProps: { className: 'button' },
   })
   common.implementsCreateMethod(Input)
   common.implementsLabelProp(Input, {
@@ -63,6 +62,7 @@ describe('Input', () => {
   })
   common.implementsHTMLInputProp(Input, {
     alwaysPresent: true,
+    assertExactMatch: false,
     shorthandDefaultProps: { type: 'text' },
   })
 
@@ -80,7 +80,9 @@ describe('Input', () => {
   common.propKeyOnlyToClassName(Input, 'inverted')
   common.propKeyOnlyToClassName(Input, 'label', { className: 'labeled' })
   common.propKeyOnlyToClassName(Input, 'loading')
+  common.propKeyOnlyToClassName(Input, 'loading', { className: 'icon' })
   common.propKeyOnlyToClassName(Input, 'transparent')
+  common.propKeyOnlyToClassName(Input, 'icon')
   common.propKeyOnlyToClassName(Input, 'icon')
 
   common.propValueOnlyToClassName(Input, 'size', SUI.SIZES)
@@ -88,12 +90,12 @@ describe('Input', () => {
   it('renders with conditional children', () => {
     shallow(
       <Input>
-        {true && <span></span>}
-        {false && <div></div>}
-      </Input>
+        {true && <span />}
+        {false && <div />}
+      </Input>,
     )
-      .should.contain(<span></span>)
-      .should.not.contain(<div></div>)
+      .should.contain(<span />)
+      .should.not.contain(<div />)
   })
 
   it('renders a text <input> by default', () => {
@@ -103,7 +105,7 @@ describe('Input', () => {
   })
 
   describe('input props', () => {
-    htmlInputProps.forEach(propName => {
+    htmlInputProps.forEach((propName) => {
       it(`passes \`${propName}\` to the <input>`, () => {
         const propValue = propName === 'onChange' ? () => null : 'foo'
         const wrapper = shallow(<Input {...{ [propName]: propValue }} />)
@@ -123,7 +125,7 @@ describe('Input', () => {
         const wrapper = shallow(
           <Input {...{ [propName]: propValue }}>
             <input />
-          </Input>
+          </Input>,
         )
 
         // account for overloading the onChange prop
@@ -154,6 +156,20 @@ describe('Input', () => {
     })
   })
 
+  describe('loading', () => {
+    it("don't add icon if it's defined", () => {
+      shallow(<Input icon='user' loading />)
+        .find('Icon')
+        .should.have.prop('name', 'user')
+    })
+
+    it("adds icon if it's not defined", () => {
+      shallow(<Input loading />)
+        .find('Icon')
+        .should.have.prop('name', 'spinner')
+    })
+  })
+
   describe('onChange', () => {
     it('is called with (e, data) on change', () => {
       const spy = sandbox.spy()
@@ -176,7 +192,7 @@ describe('Input', () => {
       const wrapper = shallow(
         <Input {...props}>
           <input />
-        </Input>
+        </Input>,
       )
 
       wrapper.find('input').simulate('change', e)
@@ -212,7 +228,7 @@ describe('Input', () => {
 
       shallow(<Input disabled={false} />)
         .find('input')
-        .should.have.not.prop('disabled')
+        .should.have.prop('disabled', false)
     })
   })
 
