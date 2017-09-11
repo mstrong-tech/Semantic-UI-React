@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import isBrowser from './isBrowser'
 
-const windowEvents = ['resize']
+const windowEvents = ['resize', 'scroll']
 
 class EventStack {
   _handlers = {}

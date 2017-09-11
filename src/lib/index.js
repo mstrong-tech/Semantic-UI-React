@@ -33,6 +33,7 @@ export {
 } from './htmlInputPropsUtils'
 
 export { default as isBrowser } from './isBrowser'
+export isStyleInViewport from './isStyleInViewport'
 export { default as leven } from './leven'
 export * as META from './META'
 export * as SUI from './SUI'

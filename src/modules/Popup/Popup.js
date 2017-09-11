@@ -1,14 +1,17 @@
 import cx from 'classnames'
 import _ from 'lodash'
+import Popper from 'popper.js'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
 import {
   childrenUtils,
   customPropTypes,
+  eventStack,
   getElementType,
   getUnhandledProps,
   isBrowser,
+  isStyleInViewport,
   makeDebugger,
   META,
   SUI,
@@ -133,8 +136,10 @@ export default class Popup extends Component {
 
   static defaultProps = {
     position: 'top left',
-    offset: 0,
+    offset: '0,0',
     on: 'hover',
+    boundariesElement: 'viewport',
+    autoFlip: true,
   }
 
   static _meta = {
@@ -157,7 +162,7 @@ export default class Popup extends Component {
     return { top, bottom: bottom + offset }
   }
 
-  computeOffset = style => {
+  computeOffset = (style) => {
     const { offset } = this.props
     const [horizontal, vertical] = _.isNumber(offset) ? [offset, 0] : offset
 
@@ -210,37 +215,6 @@ export default class Popup extends Component {
     return { ...style, ...this.computeOffset(style) }
   }
 
-  // check if the style would display
-  // the popup outside of the view port
-  isStyleInViewport(style) {
-    const { pageYOffset, pageXOffset } = window
-    const { clientWidth, clientHeight } = document.documentElement
-
-    const element = {
-      top: style.top,
-      left: style.left,
-      width: this.popupCoords.width,
-      height: this.popupCoords.height,
-    }
-    if (_.isNumber(style.right)) {
-      element.left = clientWidth - style.right - element.width
-    }
-    if (_.isNumber(style.bottom)) {
-      element.top = clientHeight - style.bottom - element.height
-    }
-
-    // hidden on top
-    if (element.top < pageYOffset) return false
-    // hidden on the bottom
-    if (element.top + element.height > pageYOffset + clientHeight) return false
-    // hidden the left
-    if (element.left < pageXOffset) return false
-    // hidden on the right
-    if (element.left + element.width > pageXOffset + clientWidth) return false
-
-    return true
-  }
-
   setPopupStyle() {
     if (!this.coords || !this.popupCoords) return
     let position = this.props.position
@@ -249,7 +223,7 @@ export default class Popup extends Component {
     // Lets detect if the popup is out of the viewport and adjust
     // the position accordingly
     const positions = _.without(POSITIONS, position).concat([position])
-    for (let i = 0; !this.isStyleInViewport(style) && i < positions.length; i += 1) {
+    for (let i = 0; !isStyleInViewport(this.popupCoords, style) && i < positions.length; i += 1) {
       style = this.computePopupStyle(positions[i])
       position = positions[i]
     }
@@ -280,7 +254,7 @@ export default class Popup extends Component {
     }
     if (_.includes(normalizedOn, 'hover')) {
       portalProps.openOnTriggerMouseEnter = true
-      portalProps.closeOnTriggerMouseLeave = true
+      portalProps.closeOnTriggerMouseLeave = false
       // Taken from SUI: https://git.io/vPmCm
       portalProps.mouseLeaveDelay = 70
       portalProps.mouseEnterDelay = 50
@@ -289,50 +263,173 @@ export default class Popup extends Component {
     return portalProps
   }
 
-  hideOnScroll = () => {
-    this.setState({ closed: true })
-    window.removeEventListener('scroll', this.hideOnScroll)
-    setTimeout(() => this.setState({ closed: false }), 50)
+  constructor(props) {
+    super(props);
+    this.state = {
+      position: null,
+      transform: null,
+      flipped: false,
+      actualPosition: null,
+      // We set these default offsets to prevent a flash of popper content in the wrong position
+      // which can cause incorrect height calculations. Popper will calculate these values
+      offsets: {
+        popper: {
+          left: -9999,
+          top: -9999,
+        },
+      },
+      originalPosition: null,
+      // fix Safari parent width: https://product-fabric.atlassian.net/browse/ED-1784
+      cssPosition: 'absolute',
+    };
   }
+
+  componentWillReceiveProps(nextProps) {
+    this.applyPopper(nextProps)
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.flipped !== this.state.flipped) {
+      this.props.onFlippedChange({
+        flipped: this.state.flipped,
+        actualPosition: this.state.actualPosition,
+        originalPosition: this.state.originalPosition,
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.popper) this.popper.destroy()
+  }
+
+  extractStyles = (state) => {
+    if (state) {
+//       const left = Math.round(state.offsets.popper.left);
+//       const top = Math.round(state.offsets.popper.top);
+// console.log(state.offsets)
+//       this.setState({
+//         // position: fixed or absolute
+//         cssPosition: state.offsets.popper.position,
+//         transform: `translate3d(${left}px, ${top}px, 0px)`,
+//         // state.flipped is either true or undefined
+//         flipped: !!state.flipped,
+//         actualPosition: state.position,
+//         originalPosition: state.originalPosition,
+//       });
+
+      const left = Math.round(state.offsets.reference.left)
+      const top = Math.round(state.offsets.popper.top)
+      const transform = `translate3d(${left}px, ${top}px, 0)`
+
+      this.setState({ styled : {
+        position: state.offsets.popper.position,
+        transform,
+        WebkitTransform: transform,
+      }})
+    }
+  };
+
+  applyPopper = (props) => {
+    //if (!this.props.targetRef || !this.props.contentRef) return
+    if (this.popper) this.popper.destroy()
+    console.log(this.triggerRef)
+if(!this.popupRef) return
+    // we wrap our target in a div so that we can safely get a reference to it, but we pass the
+    // actual target to popper
+    // const actualTarget = this.targetRef;
+    // const triggerRef = ReactDOM.findDOMNode(this.props.trigger)
+    //
+    const popperOpts = {
+      placement: 'top-right',
+      onCreate: this.extractStyles,
+      onUpdate: this.extractStyles,
+      modifiers: {
+        applyStyle: {
+          enabled: false,
+        },
+        hide: {
+          enabled: false,
+        },
+        // offset: {
+        //   enabled: true,
+        //   offset: this.props.offset,
+        // },
+        // flip: {
+        //   enabled: !!this.props.autoFlip,
+        //   flipVariations: true,
+        //   boundariesElement: this.props.boundariesElement,
+        //   padding: 0, // leave 0 pixels between popper and the boundariesElement
+        // },
+        // preventOverflow: {
+        //   enabled: !!this.props.autoFlip,
+        //   escapeWithReference: true,
+        // },
+      },
+    };
+    //
+    // // const flipBehavior = getFlipBehavior(props);
+    // // if (flipBehavior) {
+    // //   popperOpts.modifiers.flip.behavior = flipBehavior;
+    // // }
+    // console.log(triggerRef, actualTarget)
+    this.popper = new Popper(this.triggerRef, this.popupRef, popperOpts);
+  }
+
+  // ----------------------------------------
+  // Event handlers
+  // ----------------------------------------
 
   handleClose = (e) => {
     debug('handleClose()')
-    const { onClose } = this.props
-    if (onClose) onClose(e, this.props)
+
+    _.invoke(this.props, 'onClose', e, this.props)
   }
 
   handleOpen = (e) => {
     debug('handleOpen()')
-    this.coords = e.currentTarget.getBoundingClientRect()
 
-    const { onOpen } = this.props
-    if (onOpen) onOpen(e, this.props)
+    this.coords = e.currentTarget.getBoundingClientRect()
+    _.invoke(this.props, 'onOpen', e, this.props)
   }
 
   handlePortalMount = (e) => {
     debug('handlePortalMount()')
-    if (this.props.hideOnScroll) {
-      window.addEventListener('scroll', this.hideOnScroll)
-    }
+    const { hideOnScroll } = this.props
 
-    const { onMount } = this.props
-    if (onMount) onMount(e, this.props)
+    if (hideOnScroll) eventStack.sub('scroll', this.handleScroll)
+    _.invoke(this.props, 'onMount', e, this.props)
   }
 
   handlePortalUnmount = (e) => {
     debug('handlePortalUnmount()')
-    const { onUnmount } = this.props
-    if (onUnmount) onUnmount(e, this.props)
+    const { hideOnScroll } = this.props
+
+    if (hideOnScroll) eventStack.unsub('scroll', this.handleScroll)
+    _.invoke(this.props, 'onUnmount', e, this.props)
   }
 
   handlePopupRef = (popupRef) => {
     debug('popupMounted()')
+// console.log(popupRef)
     this.popupCoords = popupRef ? popupRef.getBoundingClientRect() : null
+    this.popupRef = popupRef
     this.setPopupStyle()
+    this.applyPopper(this.props)
   }
 
+  handleScroll = () => {
+    this.setState({ closed: true })
+
+    eventStack.unsub('scroll', this.handleScroll)
+    setTimeout(() => this.setState({ closed: false }), 50)
+  }
+
+  // ----------------------------------------
+  // Render
+  // ----------------------------------------
+
   render() {
-    const {
+    let {
       basic,
       children,
       className,
@@ -346,7 +443,7 @@ export default class Popup extends Component {
     } = this.props
 
     const { position, closed } = this.state
-    const style = _.assign({}, this.state.style, this.props.style)
+    const style = { ...this.state.style, ...this.props.style }
     const classes = cx(
       'ui',
       position,
@@ -367,9 +464,11 @@ export default class Popup extends Component {
     const rest = _.omit(unhandled, portalPropNames)
     const portalProps = _.pick(unhandled, portalPropNames)
     const ElementType = getElementType(Popup, this.props)
-
+    const { cssPosition, transform } = this.state;
+    // console.log(cssPosition, transform)
     const popupJSX = (
-      <ElementType {...rest} className={classes} style={style} ref={this.handlePopupRef}>
+      <ElementType {...rest} className={classes} ref={this.handlePopupRef}
+                   style={{ top: 0, left: 0, ...this.state.styled }}>
         {children}
         {childrenUtils.isNil(children) && PopupHeader.create(header)}
         {childrenUtils.isNil(children) && PopupContent.create(content)}
@@ -383,6 +482,7 @@ export default class Popup extends Component {
       <Portal
         {...mergedPortalProps}
         trigger={trigger}
+        triggerRef={c => (this.triggerRef = c)}
         onClose={this.handleClose}
         onMount={this.handlePortalMount}
         onOpen={this.handleOpen}

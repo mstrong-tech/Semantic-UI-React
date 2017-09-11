@@ -9,6 +9,8 @@ import PopupContent from 'src/modules/Popup/PopupContent'
 import * as common from 'test/specs/commonTests'
 import { domEvent, sandbox } from 'test/utils'
 
+const defaultTrigger = <button>foo</button>
+
 // ----------------------------------------
 // Wrapper
 // ----------------------------------------
@@ -28,7 +30,6 @@ const assertInBody = (...args) => assertIn(document.body, ...args)
 describe('Popup', () => {
   beforeEach(() => {
     wrapper = undefined
-    document.body.innerHTML = ''
   })
 
   afterEach(() => {
@@ -37,46 +38,6 @@ describe('Popup', () => {
 
   common.hasSubComponents(Popup, [PopupHeader, PopupContent])
   common.hasValidTypings(Popup)
-
-  // Heads up!
-  //
-  // Our commonTests do not currently handle wrapped components.
-  // Nor do they handle components rendered to the body with Portal.
-  // The Popup is wrapped in a Portal, so we manually test a few things here.
-
-  it('renders a Portal', () => {
-    wrapperShallow(<Popup />)
-      .type()
-      .should.equal(Portal)
-  })
-
-  it('renders to the document body', () => {
-    wrapperMount(<Popup open />)
-    assertInBody('.ui.popup.visible')
-  })
-
-  it('renders child text', () => {
-    wrapperMount(<Popup open>child text</Popup>)
-
-    document.querySelector('.ui.popup.visible')
-      .innerText
-      .should.equal('child text')
-  })
-
-  it('renders child components', () => {
-    const child = <div data-child />
-    wrapperMount(<Popup open>{child}</Popup>)
-
-    document
-      .querySelector('.ui.popup.visible')
-      .querySelector('[data-child]')
-      .should.not.equal(null, 'Popup did not render the child component.')
-  })
-
-  it('should add className to the Popup wrapping node', () => {
-    wrapperMount(<Popup className='some-class' open />)
-    assertInBody('.ui.popup.visible.some-class')
-  })
 
   describe('offset', () => {
     it('accepts an offset as number', () => {
@@ -147,116 +108,56 @@ describe('Popup', () => {
     })
   })
 
-  describe('hoverable', () => {
-    it('can be set to stay visible while hovering the popup', () => {
-      shallow(<Popup hoverable open />)
-        .find('Portal')
-        .should.have.prop('closeOnPortalMouseLeave', true)
-    })
-  })
 
-  describe('hide on scroll', () => {
-    it('hides on window scroll', () => {
-      const trigger = <button>foo</button>
-      wrapperMount(<Popup hideOnScroll content='foo' trigger={trigger} />)
 
-      wrapper.find('button').simulate('click')
-      assertInBody('.ui.popup.visible')
+  /*
+  *
+  *
+  *
+  *
+  *
+  *  REWRITED
+  *
+  *
+  *
+  * */
 
-      document.body.scrollTop = 100
-
-      const evt = document.createEvent('CustomEvent')
-      evt.initCustomEvent('scroll', false, false, null)
-
-      window.dispatchEvent(evt)
-
-      assertInBody('.ui.popup.visible', false)
-    })
-  })
-
-  describe('trigger', () => {
-    it('it appears on click', () => {
-      const trigger = <button>foo</button>
-      wrapperMount(<Popup on='click' content='foo' header='bar' trigger={trigger} />)
-
-      wrapper.find('button').simulate('click')
-      assertInBody('.ui.popup.visible')
+  // Heads up!
+  //
+  // Our commonTests do not currently handle wrapped components.
+  // Nor do they handle components rendered to the body with Portal.
+  // The Popup is wrapped in a Portal, so we manually test a few things here.
+  describe('children', () => {
+    it('renders a Portal', () => {
+      wrapperShallow(<Popup />)
+        .type()
+        .should.equal(Portal)
     })
 
-    it('it appears on hover', (done) => {
-      const trigger = <button>foo</button>
-      wrapperMount(<Popup content='foo' trigger={trigger} />)
-
-      wrapper.find('button').simulate('mouseenter')
-      setTimeout(() => {
-        assertInBody('.ui.popup.visible')
-        done()
-      }, 51)
-    })
-
-    it('it appears on focus', () => {
-      const trigger = <input type='text' />
-      wrapperMount(<Popup on='focus' content='foo' trigger={trigger} />)
-
-      wrapper.find('input').simulate('focus')
-      assertInBody('.ui.popup.visible')
-    })
-
-    it('it appears on multiple', (done) => {
-      const trigger = <button>foo</button>
-      const button = wrapperMount(<Popup on={['click', 'hover']} content='foo' header='bar' trigger={trigger} />)
-        .find('button')
-
-      button.simulate('click')
-      assertInBody('.ui.popup.visible')
-
-      domEvent.click('body')
-
-      button.simulate('mouseenter')
-      setTimeout(() => {
-        assertInBody('.ui.popup.visible')
-        done()
-      }, 51)
-    })
-  })
-
-  describe('open', () => {
-    it('is not open by default', () => {
-      wrapperMount(<Popup />)
-      assertInBody('.ui.popup.visible', false)
-    })
-
-    it('is passed to Portal open', () => {
-      shallow(<Popup open />)
-        .find('Portal')
-        .should.have.prop('open', true)
-
-      shallow(<Popup open={false} />)
-        .find('Portal')
-        .should.have.prop('open', false)
-    })
-
-    it('does not show the popup when false', () => {
-      wrapperMount(<Popup open={false} />)
-      assertInBody('.ui.popup.visible', false)
-    })
-
-    it('shows the popup on changing from false to true', () => {
-      wrapperMount(<Popup open={false} />)
-      assertInBody('.ui.popup.visible', false)
-
-      wrapper.setProps({ open: true })
-
-      assertInBody('.ui.popup.visible')
-    })
-
-    it('hides the popup on changing from true to false', () => {
+    it('renders to the document body', () => {
       wrapperMount(<Popup open />)
       assertInBody('.ui.popup.visible')
+    })
 
-      wrapper.setProps({ open: false })
+    it('renders child text', () => {
+      wrapperMount(<Popup open>child text</Popup>)
+      document.querySelector('.ui.popup.visible')
+        .innerText
+        .should.equal('child text')
+    })
 
-      assertInBody('.ui.popup.visible', false)
+    it('renders child components', () => {
+      const child = <div data-child />
+      wrapperMount(<Popup open>{child}</Popup>)
+      document
+        .querySelector('.ui.popup.visible')
+        .querySelector('[data-child]')
+        .should.not.equal(null, 'Popup did not render the child component.')
+    })
+
+    it('should add className to the Popup wrapping node', () => {
+      wrapperMount(<Popup className='some-class' open />)
+      assertInBody('.ui.popup.visible.some-class')
     })
   })
 
@@ -274,10 +175,155 @@ describe('Popup', () => {
     })
   })
 
+  describe('hideOnScroll', () => {
+    it('hides on window scroll', () => {
+      const scrollTop = document.body.scrollTop
+
+      wrapperMount(<Popup content='foo' hideOnScroll trigger={defaultTrigger} />)
+
+      wrapper.find('button').simulate('click')
+      assertInBody('.ui.popup.visible')
+
+      document.body.scrollTop = 100
+      domEvent.scroll(window)
+      assertInBody('.ui.popup.visible', false)
+      document.body.scrollTop = scrollTop
+    })
+  })
+
+  describe('hoverable', () => {
+    it('can be set to stay visible while hovering the popup', () => {
+      shallow(<Popup hoverable open />)
+        .find('Portal')
+        .should.have.prop('closeOnPortalMouseLeave', true)
+    })
+  })
+
   describe('inverted', () => {
     it('adds inverted to the popup className', () => {
       wrapperMount(<Popup inverted open />)
       assertInBody('.ui.inverted.popup.visible')
+    })
+  })
+
+  describe('onClose', () => {
+    let onClose
+
+    beforeEach(() => {
+      onClose = sandbox.spy()
+      wrapperMount(<Popup defaultOpen onClose={onClose} />)
+    })
+
+    it('is called with (e, props) on body click', () => {
+      domEvent.click('body')
+
+      onClose.should.have.been.calledOnce()
+      onClose.should.have.been.calledWithMatch({}, { defaultOpen: true })
+    })
+
+    it('is called with (e, props) when pressing escape', () => {
+      domEvent.keyDown(document, { key: 'Escape' })
+
+      onClose.should.have.been.calledOnce()
+      onClose.should.have.been.calledWithMatch({ key: 'Escape' }, { defaultOpen: true })
+    })
+
+    it('is not called on click inside of the popup', () => {
+      domEvent.click(document.querySelector('.ui.popup'))
+      onClose.should.not.have.been.called()
+    })
+
+    it('is not called when the open prop changes to false', () => {
+      wrapper.setProps({ open: false })
+      onClose.should.not.have.been.called()
+    })
+  })
+
+  describe('open', () => {
+    it('is not open by default', () => {
+      wrapperMount(<Popup />)
+      assertInBody('.ui.popup.visible', false)
+    })
+
+    it('is passed to Portal', () => {
+      shallow(<Popup open />)
+        .find('Portal')
+        .should.have.prop('open', true)
+      shallow(<Popup open={false} />)
+        .find('Portal')
+        .should.have.prop('open', false)
+    })
+
+    it('does not show the popup when false', () => {
+      wrapperMount(<Popup open={false} />)
+      assertInBody('.ui.popup.visible', false)
+    })
+
+    it('shows the popup on changing from false to true', () => {
+      wrapperMount(<Popup open={false} />)
+      assertInBody('.ui.popup.visible', false)
+
+      wrapper.setProps({ open: true })
+      assertInBody('.ui.popup.visible')
+    })
+
+    it('hides the popup on changing from true to false', () => {
+      wrapperMount(<Popup open />)
+      assertInBody('.ui.popup.visible')
+
+      wrapper.setProps({ open: false })
+      assertInBody('.ui.popup.visible', false)
+    })
+  })
+
+  describe('size', () => {
+    _.forEach(_.without(SUI.SIZES, 'medium', 'big', 'massive'), (size) => {
+      it(`adds the ${size} to the popup className`, () => {
+        wrapperMount(<Popup size={size} open />)
+        assertInBody(`.ui.${size}.popup`)
+      })
+    })
+  })
+
+  describe('trigger', () => {
+    it('it appears on click', () => {
+      wrapperMount(<Popup on='click' trigger={defaultTrigger} />)
+
+      wrapper.find('button').simulate('click')
+      assertInBody('.ui.popup.visible')
+    })
+
+    it('it appears on hover', (done) => {
+      wrapperMount(<Popup mouseEnterDelay={0} trigger={defaultTrigger} />)
+
+      wrapper.find('button').simulate('mouseenter')
+      setTimeout(() => {
+        assertInBody('.ui.popup.visible')
+        done()
+      }, 1)
+    })
+
+    it('it appears on focus', () => {
+      const trigger = <input type='text' />
+      wrapperMount(<Popup on='focus' trigger={trigger} />)
+
+      wrapper.find('input').simulate('focus')
+      assertInBody('.ui.popup.visible')
+    })
+
+    it('it appears on multiple', (done) => {
+      wrapperMount(<Popup on={['click', 'hover']} trigger={defaultTrigger} />)
+      const button = wrapper.find('button')
+
+      button.simulate('click')
+      assertInBody('.ui.popup.visible')
+
+      domEvent.click('body')
+      button.simulate('mouseenter')
+      setTimeout(() => {
+        assertInBody('.ui.popup.visible')
+        done()
+      }, 51)
     })
   })
 
@@ -286,52 +332,10 @@ describe('Popup', () => {
       wrapperMount(<Popup wide open />)
       assertInBody('.ui.wide.popup.visible')
     })
-  })
 
-  describe('very wide', () => {
     it('adds very wide to the popup className', () => {
       wrapperMount(<Popup wide='very' open />)
       assertInBody('.ui.very.wide.popup.visible')
-    })
-  })
-
-  describe('size', () => {
-    const sizes = _.without(SUI.SIZES, 'medium', 'big', 'massive')
-
-    sizes.forEach((size) => {
-      it(`adds the ${size} to the popup className`, () => {
-        wrapperMount(<Popup size={size} open />)
-        assertInBody(`.ui.${size}.popup`)
-      })
-    })
-  })
-
-  describe('onClose', () => {
-    let spy
-
-    beforeEach(() => {
-      spy = sandbox.spy()
-      wrapperMount(<Popup onClose={spy} defaultOpen />)
-    })
-
-    it('is not called on click inside of the popup', () => {
-      domEvent.click(document.querySelector('.ui.popup'))
-      spy.should.not.have.been.calledOnce()
-    })
-
-    it('is called on body click', () => {
-      domEvent.click('body')
-      spy.should.have.been.calledOnce()
-    })
-
-    it('is called when pressing escape', () => {
-      domEvent.keyDown(document, { key: 'Escape' })
-      spy.should.have.been.calledOnce()
-    })
-
-    it('is not called when the open prop changes to false', () => {
-      wrapper.setProps({ open: false })
-      spy.should.not.have.been.called()
     })
   })
 })
