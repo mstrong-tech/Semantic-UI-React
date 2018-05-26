@@ -5,6 +5,7 @@ import React, { PureComponent } from 'react'
 import {
   createShorthandFactory,
   customPropTypes,
+  forwardRefFactory,
   getElementType,
   getUnhandledProps,
   META,
@@ -540,4 +541,4 @@ class Flag extends PureComponent {
 
 Flag.create = createShorthandFactory(Flag, value => ({ name: value }))
 
-export default Flag
+export default forwardRefFactory(Flag)
