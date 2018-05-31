@@ -51,7 +51,7 @@ const config = {
   // ----------------------------------
   // Compiler Configuration
   // ----------------------------------
-  compiler_devtool: (__DEV__ || __TEST__) && 'cheap-source-map',
+  compiler_devtool: (__DEV__ || __TEST__) && 'eval',
   compiler_globals: {
     'process.env': {
       NODE_ENV: JSON.stringify(env),
@@ -64,6 +64,7 @@ const config = {
   compiler_hash_type: __PROD__ ? 'chunkhash' : 'hash',
   compiler_fail_on_warning: __TEST__ || __PROD__,
   compiler_output_path: paths.base(envConfig.dir_docs_dist),
+  compiler_mode: __PROD__ ? 'production' : 'development',
   compiler_public_path: '/',
   compiler_stats: {
     hash: false, // the hash of the compilation

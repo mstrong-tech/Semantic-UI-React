@@ -12,6 +12,7 @@ const webpackConfig = {
   target: 'web',
   devtool: config.compiler_devtool,
   externals: {},
+  mode: config.compiler_mode,
   module: {
     noParse: [],
     rules: [],
