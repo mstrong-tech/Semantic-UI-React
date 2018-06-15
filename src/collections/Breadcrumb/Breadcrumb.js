@@ -5,6 +5,7 @@ import React from 'react'
 
 import { childrenUtils, customPropTypes, getUnhandledProps, getElementType, SUI } from '../../lib'
 import BreadcrumbDivider from './BreadcrumbDivider'
+import BreadcrumbPair from './BreadcrumbPair'
 import BreadcrumbSection from './BreadcrumbSection'
 
 /**
@@ -25,24 +26,27 @@ function Breadcrumb(props) {
     )
   }
 
-  const childElements = []
-
-  _.each(sections, (section, index) => {
-    // section
-    const breadcrumbElement = BreadcrumbSection.create(section)
-    childElements.push(breadcrumbElement)
-
-    // divider
-    if (index !== sections.length - 1) {
-      const key = `${breadcrumbElement.key}_divider` || JSON.stringify(section)
-      childElements.push(BreadcrumbDivider.create({ content: divider, icon, key }))
-    }
-  })
-
   return (
     <ElementType {...rest} className={classes}>
-      {childElements}
+      {_.map(sections, (section, index) =>
+        BreadcrumbPair.create(section, {
+          defaultProps: {
+            divider,
+            icon,
+            trailing: index === sections.length - 1,
+          },
+        }),
+      )}
     </ElementType>
+    // // section
+    // const breadcrumbElement = BreadcrumbSection.create(section)
+    // childElements.push(breadcrumbElement)
+    //
+    // // divider
+    // if (index !== sections.length - 1) {
+    //   const key = `${breadcrumbElement.key}_divider` || JSON.stringify(section)
+    //   childElements.push(BreadcrumbDivider.create({ content: divider, icon, key }))
+    // }
   )
 }
 
@@ -77,6 +81,7 @@ Breadcrumb.propTypes = {
 }
 
 Breadcrumb.Divider = BreadcrumbDivider
+Breadcrumb.Pair = BreadcrumbPair
 Breadcrumb.Section = BreadcrumbSection
 
 export default Breadcrumb
