@@ -8,7 +8,6 @@ import {
   doesNodeContainClick,
   eventStack,
   makeDebugger,
-  META,
 } from '../../lib'
 import Ref from '../Ref'
 import PortalInner from './PortalInner'
@@ -110,6 +109,13 @@ class Portal extends Component {
 
     /** Element to be rendered in-place where the portal is defined. */
     trigger: PropTypes.node,
+
+    /**
+     * Called with a ref to the trigger node.
+     *
+     * @param {HTMLElement} node - Referred node.
+     */
+    triggerRef: PropTypes.func,
   }
 
   static defaultProps = {
@@ -120,11 +126,6 @@ class Portal extends Component {
   }
 
   static autoControlledProps = ['open']
-
-  static _meta = {
-    name: 'Portal',
-    type: META.TYPES.ADDON,
-  }
 
   static Inner = PortalInner
 
@@ -194,7 +195,7 @@ class Portal extends Component {
     _.invoke(trigger, 'props.onBlur', e, ...rest)
 
     // do not close if focus is given to the portal
-    const didFocusPortal = _.invoke(this, 'rootNode.contains', e.relatedTarget)
+    const didFocusPortal = _.invoke(this, 'portalNode.contains', e.relatedTarget)
 
     if (!closeOnTriggerBlur || didFocusPortal) return
 
@@ -328,27 +329,13 @@ class Portal extends Component {
     _.invoke(this.props, 'onUnmount', null, this.props)
   }
 
-  handleTriggerRef = c => (this.triggerNode = c)
-
-  renderTrigger() {
-    const { trigger } = this.props
-
-    if (!trigger) return null
-    return (
-      <Ref innerRef={this.handleTriggerRef} key='trigger'>
-        {cloneElement(trigger, {
-          onBlur: this.handleTriggerBlur,
-          onClick: this.handleTriggerClick,
-          onFocus: this.handleTriggerFocus,
-          onMouseLeave: this.handleTriggerMouseLeave,
-          onMouseEnter: this.handleTriggerMouseEnter,
-        })}
-      </Ref>
-    )
+  handleTriggerRef = (c) => {
+    this.triggerNode = c
+    _.invoke(this.props, 'triggerRef', c)
   }
 
   render() {
-    const { children, mountNode } = this.props
+    const { children, mountNode, trigger } = this.props
     const { open } = this.state
 
     return [
@@ -362,7 +349,17 @@ class Portal extends Component {
           {children}
         </PortalInner>
       ) : null,
-      this.renderTrigger(),
+      trigger ? (
+        <Ref innerRef={this.handleTriggerRef} key='trigger'>
+          {cloneElement(trigger, {
+            onBlur: this.handleTriggerBlur,
+            onClick: this.handleTriggerClick,
+            onFocus: this.handleTriggerFocus,
+            onMouseLeave: this.handleTriggerMouseLeave,
+            onMouseEnter: this.handleTriggerMouseEnter,
+          })}
+        </Ref>
+      ) : null,
     ]
   }
 }

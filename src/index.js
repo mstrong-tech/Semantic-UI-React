@@ -110,12 +110,14 @@ export StepTitle from './elements/Step/StepTitle'
 export Accordion from './modules/Accordion/Accordion'
 export AccordionAccordion from './modules/Accordion/AccordionAccordion'
 export AccordionContent from './modules/Accordion/AccordionContent'
+export AccordionPanel from './modules/Accordion/AccordionPanel'
 export AccordionTitle from './modules/Accordion/AccordionTitle'
 
 export Checkbox from './modules/Checkbox'
 
 export Dimmer from './modules/Dimmer'
 export DimmerDimmable from './modules/Dimmer/DimmerDimmable'
+export DimmerInner from './modules/Dimmer/DimmerInner'
 
 export Dropdown from './modules/Dropdown'
 export DropdownDivider from './modules/Dropdown/DropdownDivider'

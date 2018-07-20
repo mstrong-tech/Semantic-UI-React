@@ -8,11 +8,11 @@ import {
   childrenUtils,
   customPropTypes,
   doesNodeContainClick,
+  eventStack,
   getElementType,
   getUnhandledProps,
   isBrowser,
   makeDebugger,
-  META,
   useKeyOnly,
 } from '../../lib'
 import Icon from '../../elements/Icon'
@@ -42,6 +42,9 @@ class Modal extends Component {
     /** A modal can reduce its complexity */
     basic: PropTypes.bool,
 
+    /** A modal can be vertically centered in the viewport */
+    centered: PropTypes.bool,
+
     /** Primary content. */
     children: PropTypes.node,
 
@@ -64,7 +67,7 @@ class Modal extends Component {
     defaultOpen: PropTypes.bool,
 
     /** A Modal can appear in a dimmer. */
-    dimmer: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['inverted', 'blurring'])]),
+    dimmer: PropTypes.oneOf([true, 'inverted', 'blurring']),
 
     /** Event pool namespace that is used to handle component events */
     eventPool: PropTypes.string,
@@ -134,6 +137,7 @@ class Modal extends Component {
   }
 
   static defaultProps = {
+    centered: true,
     dimmer: true,
     closeOnDimmerClick: true,
     closeOnDocumentClick: false,
@@ -141,11 +145,6 @@ class Modal extends Component {
   }
 
   static autoControlledProps = ['open']
-
-  static _meta = {
-    name: 'Modal',
-    type: META.TYPES.MODULE,
-  }
 
   static Header = ModalHeader
   static Content = ModalContent
@@ -176,8 +175,8 @@ class Modal extends Component {
     this.trySetState({ open: false })
   }
 
-  handleDimmerClick = (e) => {
-    debug('handleDimmerClick()')
+  handleDocumentClick = (e) => {
+    debug('handleDocumentClick()')
     const { closeOnDimmerClick } = this.props
 
     if (!closeOnDimmerClick || doesNodeContainClick(this.ref, e)) return
@@ -201,22 +200,36 @@ class Modal extends Component {
   }
 
   handlePortalMount = (e) => {
-    debug('handlePortalMount()')
+    const { eventPool } = this.props
+    debug('handlePortalMount()', { eventPool })
 
     this.setState({ scrolling: false })
     this.setPositionAndClassNames()
 
+    eventStack.sub('click', this.handleDocumentClick, { pool: eventPool, target: this.dimmerRef })
     _.invoke(this.props, 'onMount', e, this.props)
   }
 
   handlePortalUnmount = (e) => {
-    debug('handlePortalUnmount()')
+    const { eventPool } = this.props
+    debug('handlePortalUnmount()', { eventPool })
 
     cancelAnimationFrame(this.animationRequestId)
+    eventStack.unsub('click', this.handleDocumentClick, { pool: eventPool, target: this.dimmerRef })
     _.invoke(this.props, 'onUnmount', e, this.props)
   }
 
   handleRef = c => (this.ref = c)
+
+  handleDimmerRef = c => (this.dimmerRef = c)
+
+  setDimmerNodeStyle = () => {
+    debug('setDimmerNodeStyle()')
+
+    if (this.dimmerRef) {
+      this.dimmerRef.style.setProperty('display', 'flex', 'important')
+    }
+  }
 
   setPositionAndClassNames = () => {
     const { dimmer } = this.props
@@ -235,7 +248,10 @@ class Modal extends Component {
     if (this.ref) {
       const { height } = this.ref.getBoundingClientRect()
 
-      const marginTop = -Math.round(height / 2)
+      // Leaving the old calculation here since we may need it as an older browser fallback
+      // SEE: https://github.com/Semantic-Org/Semantic-UI/issues/6185#issuecomment-376725956
+      // const marginTop = -Math.round(height / 2)
+      const marginTop = null
       const scrolling = height >= window.innerHeight
 
       if (this.state.marginTop !== marginTop) {
@@ -253,6 +269,8 @@ class Modal extends Component {
     if (!_.isEmpty(newState)) this.setState(newState)
 
     this.animationRequestId = requestAnimationFrame(this.setPositionAndClassNames)
+
+    this.setDimmerNodeStyle()
   }
 
   renderContent = (rest) => {
@@ -314,7 +332,7 @@ class Modal extends Component {
 
   render() {
     const { open } = this.state
-    const { closeOnDocumentClick, dimmer, eventPool, trigger } = this.props
+    const { centered, closeOnDocumentClick, dimmer, eventPool, trigger } = this.props
     const mountNode = this.getMountNode()
 
     // Short circuit when server side rendering
@@ -337,13 +355,12 @@ class Modal extends Component {
     const portalProps = _.pick(unhandled, portalPropNames)
 
     // wrap dimmer modals
-    const dimmerClasses = !dimmer
-      ? null
-      : cx(
-        'ui',
-        dimmer === 'inverted' && 'inverted',
-        'page modals dimmer transition visible active',
-      )
+    const dimmerClasses = cx(
+      'ui',
+      dimmer === 'inverted' && 'inverted',
+      !centered && 'top aligned',
+      'page modals dimmer transition visible active',
+    )
 
     // Heads up!
     //
@@ -369,7 +386,7 @@ class Modal extends Component {
         onOpen={this.handleOpen}
         onUnmount={this.handlePortalUnmount}
       >
-        <div className={dimmerClasses} onClick={this.handleDimmerClick}>
+        <div className={dimmerClasses} ref={this.handleDimmerRef}>
           {this.renderContent(rest)}
         </div>
       </Portal>
