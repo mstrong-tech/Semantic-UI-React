@@ -10,16 +10,8 @@ export default class ComponentControlsCopyLink extends Component {
     onClick: PropTypes.func,
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state.active !== nextState.active
-  }
-
-  componentDidMount() {
-    this.mounted = true
-  }
-
   componentWillUnmount() {
-    this.mounted = false
+    clearTimeout(this.timerId)
   }
 
   handleClick = (e) => {
@@ -29,10 +21,10 @@ export default class ComponentControlsCopyLink extends Component {
     onClick()
 
     this.setState({ active: true })
-    setTimeout(this.resetActive, 3000)
+    this.timerId = setTimeout(this.resetActive, 3000)
   }
 
-  resetActive = () => this.mounted && this.setState({ active: false })
+  resetActive = () => this.setState({ active: false })
 
   render() {
     const { anchorName } = this.props
