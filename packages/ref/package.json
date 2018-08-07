@@ -1,0 +1,17 @@
+{
+  "name": "semantic-ui-react-ref",
+  "license": "MIT",
+  "version": "0.90.0",
+  "author": "Levi Thomason <me@levithomason.com>",
+  "description": "This component exposes a callback prop that always returns the DOM node of both functional and class component children.",
+  "repository": "https://github.com/Semantic-Org/Semantic-UI-React/tree/master/packages/ref",
+  "main": "index.js",
+  "dependencies": {
+    "@babel/runtime": "^7.0.0-beta.56",
+    "prop-types": "^15.6.1"
+  },
+  "peerDependencies": {
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "semantic-ui-react-lib",
+  "license": "MIT",
+  "version": "0.90.0",
+  "author": "Levi Thomason <me@levithomason.com>",
+  "description": "A core library for Semantic UI React.",
+  "repository": "https://github.com/Semantic-Org/Semantic-UI-React/tree/master/packages/lib",
+  "main": "index.js",
+  "dependencies": {
+    "@babel/runtime": "^7.0.0-beta.56",
+    "classnames": "^2.2.5",
+    "keyboard-key": "^1.0.1",
+    "lodash": "^4.17.10",
+    "prop-types": "^15.6.1",
+    "shallowequal": "^1.0.2"
+  },
+  "peerDependencies": {
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0"
+  }
+}

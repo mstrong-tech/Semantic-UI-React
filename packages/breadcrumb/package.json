@@ -1,0 +1,21 @@
+{
+  "name": "semantic-ui-react-breadcrumb",
+  "license": "MIT",
+  "version": "0.90.0",
+  "author": "Levi Thomason <me@levithomason.com>",
+  "description": "A component that allows you to render children outside their parent.",
+  "repository": "https://github.com/Semantic-Org/Semantic-UI-React/tree/master/packages/portal",
+  "main": "index.js",
+  "dependencies": {
+    "@babel/runtime": "^7.0.0-beta.56",
+    "classnames": "^2.2.5",
+    "lodash": "^4.17.10",
+    "prop-types": "^15.6.1",
+    "semantic-ui-react-icon": "0.90.0",
+    "semantic-ui-react-lib": "0.90.0"
+  },
+  "peerDependencies": {
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0"
+  }
+}

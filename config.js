@@ -1,4 +1,4 @@
-import path from 'path'
+const path = require('path')
 
 // ------------------------------------
 // Environment vars
@@ -15,12 +15,12 @@ const envConfig = {
   // Project Structure
   // ----------------------------------
   path_base: __dirname,
-  dir_src: 'src',
   dir_dist: 'dist',
   dir_dll: 'dll',
   dir_docs_dist: 'docs/dist',
   dir_docs_public: 'docs/public',
   dir_docs_src: 'docs/src',
+  dir_packages: 'packages',
 }
 
 // ------------------------------------
@@ -30,12 +30,12 @@ const base = (...args) => path.resolve(...[envConfig.path_base, ...args])
 
 const paths = {
   base,
-  src: base.bind(null, envConfig.dir_src),
   dist: base.bind(null, envConfig.dir_dist),
   dll: base.bind(null, envConfig.dir_dll),
   docsDist: base.bind(null, envConfig.dir_docs_dist),
   docsPublic: base.bind(null, envConfig.dir_docs_public),
   docsSrc: base.bind(null, envConfig.dir_docs_src),
+  packages: base.bind(null, envConfig.dir_packages),
 }
 
 const config = {
@@ -99,4 +99,4 @@ const config = {
   ],
 }
 
-export default config
+module.exports = config
