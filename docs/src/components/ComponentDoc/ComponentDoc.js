@@ -2,15 +2,14 @@ import _ from 'lodash'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { withRouteData } from 'react-static'
-import { Grid, Header, Icon } from 'semantic-ui-react'
+import { Grid, Icon } from 'semantic-ui-react'
 
 import DocsLayout from 'docs/src/components/DocsLayout'
 import { docTypes, examplePathToHash, getFormattedHash, scrollToAnchor } from 'docs/src/utils'
 import { isBrowser } from 'src/lib'
-import ComponentDocLinks from './ComponentDocLinks'
-import ComponentDocSee from './ComponentDocSee'
+import ComponentHeading from '../ComponentHeading'
+import ComponentProps from '../ComponentProps'
 import ComponentExamples from './ComponentExamples'
-import ComponentProps from './ComponentProps'
 import ComponentSidebar from './ComponentSidebar'
 
 const exampleEndStyle = {
@@ -82,16 +81,12 @@ class ComponentDoc extends Component {
         <Grid padded>
           <Grid.Row>
             <Grid.Column>
-              <Header
-                as='h1'
-                content={displayName}
-                subheader={_.join(componentInfo.docblock.description, ' ')}
-              />
-              <ComponentDocSee seeTags={seeTags} />
-              <ComponentDocLinks
+              <ComponentHeading
+                description={_.join(componentInfo.docblock.description, ' ')}
                 displayName={displayName}
                 parentDisplayName={componentInfo.parentDisplayName}
                 repoPath={componentInfo.repoPath}
+                seeTags={seeTags}
                 type={componentInfo.type}
               />
               <ComponentProps componentsInfo={componentsInfo} displayName={displayName} />

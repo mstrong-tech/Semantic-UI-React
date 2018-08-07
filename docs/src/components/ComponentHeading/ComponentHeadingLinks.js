@@ -14,7 +14,7 @@ const linkListStyle = {
   top: '0',
 }
 
-export default class ComponentDocLinks extends PureComponent {
+export default class ComponentHeadingLinks extends PureComponent {
   static propTypes = {
     displayName: PropTypes.string.isRequired,
     parentDisplayName: PropTypes.string,

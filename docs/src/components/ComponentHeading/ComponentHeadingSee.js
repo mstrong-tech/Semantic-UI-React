@@ -7,7 +7,7 @@ import { docTypes } from 'docs/src/utils'
 
 const listStyle = { display: 'block' }
 
-const ComponentDocSee = ({ seeTags }) => (
+const ComponentHeadingSee = ({ seeTags }) => (
   <List horizontal link size='small' style={listStyle}>
     {/* Heads up! Still render empty lists to reserve the whitespace */}
     <List.Item>
@@ -19,8 +19,8 @@ const ComponentDocSee = ({ seeTags }) => (
   </List>
 )
 
-ComponentDocSee.propTypes = {
+ComponentHeadingSee.propTypes = {
   seeTags: docTypes.seeTags.isRequired,
 }
 
-export default ComponentDocSee
+export default ComponentHeadingSee

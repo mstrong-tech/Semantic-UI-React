@@ -4,9 +4,9 @@ import React, { Component } from 'react'
 import { Checkbox } from 'semantic-ui-react'
 
 import { docTypes } from 'docs/src/utils'
-import ComponentTable from '../ComponentTable'
 import ComponentPropsComponents from './ComponentPropsComponents'
 import ComponentPropsDescription from './ComponentPropsDescription'
+import ComponentTable from './ComponentTable'
 
 const propsContainerStyle = { overflowX: 'auto' }
 
